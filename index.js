@@ -4,6 +4,7 @@
  */
 
 const RSS_URL = 'https://justlovemaki.github.io/CloudFlare-AI-Insight-Daily/rss.xml';
+const LLM_API_KEY = process.env.LLM_API_KEY;
 const FEISHU_WEBHOOK_URL = process.env.FEISHU_WEBHOOK_URL;
 
 /**
@@ -151,6 +152,55 @@ ${sections.map(section => formatSection(section)).join('\n\n')}
 }
 
 /**
+ * 调用大模型进行智能总结
+ */
+async function summarizeWithAI(htmlContent) {
+  if (!LLM_API_KEY) {
+    console.log('⚠️ 未配置 LLM_API_KEY，跳过 AI 总结');
+    return htmlContent;
+  }
+
+  console.log('🧠 正在请求大模型进行智能总结...');
+  
+  // 构造给大模型的提示词（Prompt）
+  const prompt = `你是一个资深的AI行业新闻秘书。下面是一份今天的AI日报原始HTML代码。
+请你阅读它，然后帮我总结成一份精简的简报。
+要求：
+1. 提炼出最核心的3-5条新闻。
+2. 每条新闻保留原链接（如果有的话）。
+3. 最后用一句话点评今天的整体趋势。
+4. 直接输出最终结果，不要客套话，不要包含HTML标签。
+
+原始内容：
+${htmlContent}`;
+
+  const response = await fetch('https://api.deepseek.com/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${LLM_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: 'deepseek-chat',
+      messages: [
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.7
+    })
+  });
+
+  if (!response.ok) {
+    console.log('❌ 大模型调用失败，降级为直接发送原文');
+    return htmlContent;
+  }
+
+  const data = await response.json();
+  const aiText = data.choices[0].message.content;
+  console.log('✅ 大模型总结完成');
+  return aiText;
+}
+
+/**
  * 解析 HTML 格式的日报内容
  */
 function parseHTMLContent(html) {
@@ -279,14 +329,25 @@ async function main() {
     const latestItem = await fetchLatestRSSItem();
 
     // 2. 格式化内容
-    const { title, content, link } = formatDailyReport(latestItem);
+    // 原来：
+// const { title, content, link } = formatDailyReport(latestItem);
+// await sendToFeishu(title, content, link);
+
+// 改成：
+let finalContent;
+if (LLM_API_KEY) {
+  finalContent = await summarizeWithAI(latestItem.description); // 把原始HTML扔给AI总结
+} else {
+  const formatted = formatDailyReport(latestItem); // 降级方案：用原来的本地正则
+  finalContent = formatted.content;
+}
+await sendToFeishu(latestItem.title, finalContent, latestItem.link);
 
     console.log('📝 消息已格式化');
     console.log('📤 准备推送到飞书...');
 
     // 3. 推送到飞书
-    await sendToFeishu(title, content, link);
-
+    await sendToFeishu(latestItem.title, finalContent, latestItem.link);
     console.log('===========================================');
     console.log('✅ 任务完成！日报已成功推送到飞书');
 
