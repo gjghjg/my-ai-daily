@@ -218,8 +218,8 @@ function parseHTMLContent(html) {
     const sectionTitle = match[1].trim();
     const sectionContent = match[2];
 
-    // 提取 <li> 条目
-    const items = [];
+    // 🚨 改造开始：使用 Set 自动去重，防止一份内容被总结两遍
+    const itemsSet = new Set(); 
     const liRegex = /<li>(.*?)<\/li>/g;
     let liMatch;
 
@@ -234,9 +234,13 @@ function parseHTMLContent(html) {
         .trim();
 
       if (itemText && !itemText.includes('剩余内容已省略')) {
-        items.push(itemText);
+        itemsSet.add(itemText); // 使用 add 而不是 push，一模一样的文字会被自动忽略
       }
     }
+
+    // 将去重后的 Set 转换回数组
+    const items = Array.from(itemsSet); 
+    // 🚨 改造结束
 
     if (items.length > 0) {
       sections.push({
