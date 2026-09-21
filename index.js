@@ -349,7 +349,7 @@ if (LLM_API_KEY) {
   const formatted = formatDailyReport(latestItem); // 降级方案：用原来的本地正则
   finalContent = formatted.content;
 }
-await sendToFeishu(latestItem.title, finalContent, latestItem.link);
+
 
     console.log('📝 消息已格式化');
     console.log('📤 准备推送到飞书...');
