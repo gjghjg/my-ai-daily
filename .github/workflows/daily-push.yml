@@ -24,4 +24,4 @@ jobs:
       - name: 推送到飞书
         env:
           FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
-        run: node push-to-feishu.js
+        run: node index.js
