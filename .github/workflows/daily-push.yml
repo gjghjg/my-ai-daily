@@ -1,9 +1,9 @@
 name: 推送 AI 日报到飞书
 
 on:
-  # 每天北京时间 10:00 推送（UTC 时间 2:00）
+  # 每天北京时间 20:00 推送（UTC 时间 12:00）
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '0 12 * * *'
 
   # 允许手动触发
   workflow_dispatch:
