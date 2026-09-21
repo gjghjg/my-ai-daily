@@ -24,4 +24,5 @@ jobs:
       - name: 推送到飞书
         env:
           FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
         run: node index.js
