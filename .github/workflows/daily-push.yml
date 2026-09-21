@@ -1,0 +1,27 @@
+name: 推送 AI 日报到飞书
+
+on:
+  # 每天北京时间 10:00 推送（UTC 时间 2:00）
+  schedule:
+    - cron: '0 2 * * *'
+
+  # 允许手动触发
+  workflow_dispatch:
+
+jobs:
+  push-to-feishu:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 推送到飞书
+        env:
+          FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
+        run: node push-to-feishu.js
