@@ -1,0 +1,23 @@
+{
+  "name": "feishu-rss-bot",
+  "version": "1.0.0",
+  "description": "将 CloudFlare AI Insight Daily 日报自动推送到飞书群聊",
+  "main": "push-to-feishu.js",
+  "scripts": {
+    "start": "node push-to-feishu.js",
+    "test": "node push-to-feishu.js"
+  },
+  "keywords": [
+    "rss",
+    "feishu",
+    "lark",
+    "bot",
+    "ai",
+    "daily-report"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
